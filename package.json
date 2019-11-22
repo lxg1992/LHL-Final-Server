@@ -1,0 +1,25 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "server": "resetdb.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lxg1992/LHL-Final-Server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lxg1992/LHL-Final-Server/issues"
+  },
+  "homepage": "https://github.com/lxg1992/LHL-Final-Server#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
