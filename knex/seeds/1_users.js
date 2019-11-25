@@ -11,8 +11,6 @@ exports.seed = function(knex) {
         {first_name: 'John', last_name:'Malone', email: 'jm@email.com', password_hash:'jm'},
         {first_name: 'John', last_name:'Galone', email: 'jg@email.com', password_hash:'jg'},
         {first_name: 'John', last_name:'Balone', email: 'jb@email.com', password_hash:'jb'}
-
-
       ]);
     });
 };

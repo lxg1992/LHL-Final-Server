@@ -8,10 +8,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "migrate": "knex migrate:latest",
     "unmigrate": "knex migrate:rollback",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "reset": "knex migrate:rollback && knex migrate:latest && knex seed:run"
   },
   "repository": {
     "type": "git",
