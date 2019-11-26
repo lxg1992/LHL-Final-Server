@@ -11,14 +11,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 //Test route
 app.get('/', (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   res.send({ message: 'No resource at this route, try /users, /rooms, /guests, /questions' })
 })
 
 //USER ROUTES
 //Get all users
 app.get('/users', async (req, res) => {
+  console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
   try {
-    console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
     let result = await knex('users')
     res.json(result);
   } catch (error) {
@@ -28,8 +30,8 @@ app.get('/users', async (req, res) => {
 
 //Create a new user
 app.post('/users/register', async (req, res) => {
+  console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
   try {
-    console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
     let form = req.body
     let result = await knex('users').insert({ first_name: form.first_name, last_name: form.last_name, email: form.email, password_hash: form.password }).returning('*')
     res.json(result)
@@ -40,8 +42,8 @@ app.post('/users/register', async (req, res) => {
 
 //Login a user
 app.post('/users/login', async (req, res) => {
+  console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
   try {
-    console.log('METHOD: ',req.method,', ROUTE: ', req.originalUrl)
 
     let form = req.body
     let result = await knex('users').where({ 'email': form.email, 'password_hash': form.password }).returning('*')
@@ -58,6 +60,8 @@ app.post('/users/login', async (req, res) => {
 
 //Get a user by email
 app.get('/users/:email', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let email = req.params.email
     let result = await knex('users').where('email', email)
@@ -73,6 +77,8 @@ app.get('/users/:email', async (req, res) => {
 
 //Get all rooms where userID is the host
 app.get('/users/:id/rooms/all', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
@@ -88,6 +94,8 @@ app.get('/users/:id/rooms/all', async (req, res) => {
 })
 
 app.get('/users/:id/rooms/past', async(req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
@@ -100,6 +108,8 @@ app.get('/users/:id/rooms/past', async(req, res) => {
 })
 
 app.get('/users/:id/rooms/current', async(req,res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
@@ -113,6 +123,8 @@ app.get('/users/:id/rooms/current', async(req,res) => {
 })
 
 app.get('/users/:id/rooms/future', async(req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
@@ -129,6 +141,8 @@ app.get('/users/:id/rooms/future', async(req, res) => {
 
 //get all rooms
 app.get('/rooms', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let result = await knex('rooms')
     res.json(result)
@@ -137,9 +151,34 @@ app.get('/rooms', async (req, res) => {
   }
 })
 
+app.get('/rooms/:hash', (req, res) => {
+  
+})
+
 app.post('/rooms', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
+    let host_id = req.body.host_id
+    let datetime_start = req.body.datetime_start
+    let datetime_end = req.body.datetime_end
+    let room_name = req.body.room_name
+    let room_hash = req.body.room_hash
+    let tags_created = req.body.topics
+
+    let result = await knex('rooms')
+      .insert({host_id: host_id, datetime_start: datetime_start, datetime_end: datetime_end, room_name: room_name, room_hash: room_hash, tags_created: JSON.stringify(tags_created) })
+      .returning('*')
     
+    if(result.length){
+      res.json(result);
+    } else {
+      res.json({error: "Unable to insert room"})
+    }
+
+
+
+
   } catch (error) {
     console.error(error)
   }
@@ -148,8 +187,8 @@ app.post('/rooms', async (req, res) => {
 
 //get all questions by room hash
 app.get('/rooms/:hash/questions', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
   try {
-    console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
 
     let hash = req.params.hash
 
@@ -162,19 +201,12 @@ app.get('/rooms/:hash/questions', async (req, res) => {
 
     console.log('========ROOM ID:',room_id,'=======')
 
-    // let result = await knex
-    //   .select('guests.guest_hash','questions.query', 'questions.tags_selected', 'questions.created_at')
-    //   .from('questions')
-    //   .join('guests','guests.room_id','questions.room_id')
-    //   .where('questions.room_id',room_id)
-      
-      let result = await knex.raw('select guests.guest_hash, questions.* from questions, guests where guests.id = questions.user_id and questions.room_id = ? ORDER BY questions.created_at ASC ',[room_id])
-        // .select('questions.*','guests.guest_hash')
-        // .from('questions','guests')
-        // .where('guests.id','questions.user_id')
-        // .andWhere('questions.room_id', room_id)
 
-      console.log('RESULT IS: ', result.rows)
+      
+    let result = await knex.raw('select guests.guest_hash, questions.* from questions, guests where guests.id = questions.user_id and questions.room_id = ? ORDER BY questions.created_at ASC ',[room_id])
+
+
+    console.log('RESULT IS: ', result.rows)
 
   if (result.rows.length) {
     res.json(result.rows);
@@ -182,19 +214,6 @@ app.get('/rooms/:hash/questions', async (req, res) => {
     res.status(204).json({ error: 'Either wrong hash or this room has no questions' })      
   }
 
-    
-
-    // let result = await knex
-    //   .select('guests.guest_hash', 'questions.query', 'questions.tags_selected', 'questions.created_at')
-    //   .from('questions')
-    //   .join('rooms', 'rooms.id', 'questions.room_id')
-    //   .join('guests', 'guests.room_id', 'rooms.id')
-    //   .where('rooms.room_hash', hash)
-    // if (result.length) {
-    //   res.json(result);
-    // } else {
-    //   res.status(204).json({ error: 'Either wrong hash or this room has no questions' })      
-    // }
   } catch (error) {
     console.error(error);
   }
@@ -202,8 +221,8 @@ app.get('/rooms/:hash/questions', async (req, res) => {
 
 //Get tags_created for a room
 app.get('/rooms/:hash/tags', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
   try {
-    console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
 
     let hash = req.params.hash
     let result = await knex
@@ -222,6 +241,8 @@ app.get('/rooms/:hash/tags', async (req, res) => {
 
 //get all current guests for a room hash
 app.get('/rooms/:hash/guests', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let hash = req.params.hash;
     let result = await knex
@@ -243,8 +264,8 @@ app.get('/rooms/:hash/guests', async (req, res) => {
 
 //Post a question into current rooms question 
 app.post('/rooms/:hash/questions', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
   try {
-    console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
 
     let hash = req.params.hash
     let query = req.body.message
@@ -282,6 +303,8 @@ app.post('/rooms/:hash/questions', async (req, res) => {
 
 //get all questions
 app.get('/questions', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let result = await knex('questions')
     res.json(result)
@@ -291,7 +314,9 @@ app.get('/questions', async (req, res) => {
 });
 
 //get specific question
-app.get('/questions/:id', async (req, res) => {
+app.get('/questions/:room_id', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let id = req.params.id;
     let result = await knex('questions').where('id', id)
@@ -304,6 +329,8 @@ app.get('/questions/:id', async (req, res) => {
 
 
 app.get('/guests', async (req, res) => {
+  console.log('METHOD:',req.method,'; ROUTE:', req.originalUrl, '; TIME:',new Date().toLocaleTimeString())
+
   try {
     let result = await knex('guests')
     res.json(result);
