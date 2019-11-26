@@ -12,8 +12,8 @@ exports.seed = function(knex) {
         {room_id: 3, guest_id: 3, guest_hash: 'kik'},
 
         {room_id:6, guest_id:4, guest_hash: 'lel'},
-        {room_id:6, guest_id:5, guest_hash: 'lel'},
-        {room_id:6, guest_id:6, guest_hash: 'lel'},
+        {room_id:6, guest_id:5, guest_hash: 'lil'},
+        {room_id:6, guest_id:6, guest_hash: 'lul'},
         {room_id:6, guest_id:3, guest_hash: 'ban', is_allowed: false}
 
       ]);

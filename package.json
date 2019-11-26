@@ -12,7 +12,9 @@
     "migrate": "knex migrate:latest",
     "unmigrate": "knex migrate:rollback",
     "seed": "knex seed:run",
-    "reset": "knex migrate:rollback && knex migrate:latest   && knex seed:run"
+    "reset": "knex migrate:rollback && knex migrate:latest   && knex seed:run",
+    "rebase": "knex migrate:rollback && knex migrate:latest"
+
   },
   "repository": {
     "type": "git",
