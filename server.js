@@ -4,6 +4,8 @@ const knex = require('./knex/db.js');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const { generateRandomString } = require('./helpers/helpers')
+
 const app = express()
 app.use(cors());
 app.use(bodyParser.json())
@@ -163,7 +165,7 @@ app.post('/rooms', async (req, res) => {
     let datetime_start = req.body.datetime_start
     let datetime_end = req.body.datetime_end
     let room_name = req.body.room_name
-    let room_hash = req.body.room_hash
+    let room_hash = generateRandomString(5);
     let tags_created = req.body.topics
 
     let result = await knex('rooms')
