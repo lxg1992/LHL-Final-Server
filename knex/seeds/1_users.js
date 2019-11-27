@@ -1,3 +1,7 @@
+const { hashPassword } = require('../../helpers/hashHelp')
+
+
+
 
 exports.seed = function(knex) {
   // Deletes ALL existing entries
