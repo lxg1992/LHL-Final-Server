@@ -216,7 +216,7 @@ app.get('/rooms', async (req, res) => {
   }
 })
 
-app.get('/rooms/:hash', (req, res) => {
+app.get('/rooms/:hash',async (req, res) => {
   try {
     let hash = req.params.hash
     let result = await knex('rooms')
