@@ -25,13 +25,30 @@ exports.up = function(knex) {
     table.json('tags_created') // = ['ruby','java']
   })
   
+  
+  .createTable('guests', table => {
+    table.increments('id').primary()
+    table
+    .integer('room_id')
+    .unsigned()
+    .references('rooms.id')
+    .notNull()
+    table
+    .integer('user_id')
+    .unsigned()
+    .references('users.id')
+    .notNull()
+    table.string('guest_hash').notNull()
+    table.boolean('is_allowed').defaultTo('true')
+  })
+  
   .createTable('questions', table => {
     table.increments('id').primary()
     table.timestamp('created_at').defaultTo(knex.fn.now())
     table
-      .integer('user_id')
+      .integer('guest_id')
       .unsigned()
-      .references('users.id')
+      .references('guests.id')
       .notNull()
     table
       .integer('room_id')
@@ -41,23 +58,6 @@ exports.up = function(knex) {
     table.text('query', 150)
     table.json('tags_selected')
   })
-  
-  .createTable('guests', table => {
-    table.increments('id').primary()
-    table
-      .integer('room_id')
-      .unsigned()
-      .references('rooms.id')
-      .notNull()
-    table
-      .integer('guest_id')
-      .unsigned()
-      .references('users.id')
-      .notNull()
-    table.string('guest_hash').notNull()
-    table.boolean('is_allowed').defaultTo('true')
-  })
-
   
   
   .then((result) => {

@@ -1,3 +1,5 @@
+//TO DO: HASH User password seeds, CHECK IF ROOM HAS IS UNIQUE password
+
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const knex = require('./knex/db.js');
@@ -35,48 +37,48 @@ app.get('/users', async (req, res) => {
 
 app.get('/user/:id/pw', async (req, res) => {
   try {
-    let result = await knex.select('id','password_hash').from('users').where('id', req.params.id)
+    let result = await knex.select('id', 'password_hash').from('users').where('id', req.params.id)
     console.log(result);
     let password = result[0];
     console.log(result[0].password_hash);
     console.log(result[0].id)
     res.json(result);
   } catch (error) {
-    
+
   }
 })
 //Create a new user
 app.post('/users/register', async (req, res) => {
   try {
-    let {first_name, last_name, email, password } = req.body
+    let { first_name, last_name, email, password } = req.body
 
-    if (!first_name || !last_name || !email || !password){
-      res.status(400).json({error: 'Please enter all fields'})
+    if (!first_name || !last_name || !email || !password) {
+      res.status(400).json({ error: 'Please enter all fields' })
     } else {
 
-      let emailCheck = await knex('users').where('email',email)
-        if(emailCheck.length){
-          res.status(400).json({error: "Email already registered"})
-        } else {
+      let emailCheck = await knex('users').where('email', email)
+      if (emailCheck.length) {
+        res.status(400).json({ error: "Email already registered" })
+      } else {
         let password_hash = await hashPassword(password)
         let user = await knex('users').insert(
-          { 
-            first_name: first_name, 
-            last_name: last_name, 
-            email: email, 
+          {
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
             password_hash: password_hash
           })
           .returning('*')
 
         jwt.sign(
-          {id: user[0].id},
+          { id: user[0].id },
           config.get('jwtSecret'),
           (err, token) => {
-            if(err) throw err;
-            res.json({user,token})
+            if (err) throw err;
+            res.json({ user, token })
           }
         )
-        }
+      }
     }
   } catch (error) {
     console.error(error)
@@ -86,39 +88,38 @@ app.post('/users/register', async (req, res) => {
 //Login a user
 app.post('/users/login', async (req, res) => {
   try {
-
-    let {email, password} = req.body
+    let { email, password } = req.body
     let queryEmail = await knex('users')
-      .where({ 'email': email})
+      .where({ 'email': email })
       .returning('email')
     if (!queryEmail.length) {
       res.status(403).json({ error: 'Unable to find user' })
     } else {
       let user = await knex.select('*').from('users')
-        .where('email',email)
+        .where('email', email)
         .returning('*')
       let checkConfirmed = await checkPassword(password, user[0].password_hash)
-      if(checkConfirmed){
+      if (checkConfirmed) {
         jwt.sign(
-          {id: user[0].id},
+          { id: user[0].id },
           config.get('jwtSecret'),
           (err, token) => {
-            if(err) throw err;
-            res.json({user,token})
+            if (err) throw err;
+            res.json({ user, token })
           }
         )
       } else {
-        res.status(403).json({ error: "Wrong password"})
+        res.status(403).json({ error: "Wrong password" })
       }
     }
   } catch (error) {
-    console.error(error)  
+    console.error(error)
   }
 })
 
 
 //Get a user by email
-app.get('/users/:email',auth, async (req, res) => {
+app.get('/users/:email', async (req, res) => {
   try {
     let email = req.params.email
     let result = await knex('users').where('email', email)
@@ -147,11 +148,11 @@ app.get('/users/:id/rooms/all', async (req, res) => {
   }
 })
 
-app.get('/users/:id/rooms/past', async(req, res) => {
+app.get('/users/:id/rooms/past', async (req, res) => {
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
-      .where({'host_id':host_id})
+      .where({ 'host_id': host_id })
       .andWhere('datetime_end', '<', knex.fn.now())
     res.json(result)
   } catch (error) {
@@ -159,25 +160,25 @@ app.get('/users/:id/rooms/past', async(req, res) => {
   }
 })
 
-app.get('/users/:id/rooms/current', async(req,res) => {
+app.get('/users/:id/rooms/current', async (req, res) => {
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
-      .where({'host_id':host_id})
+      .where({ 'host_id': host_id })
       .andWhere('datetime_end', '>', knex.fn.now())
-      .andWhere('datetime_start','<', knex.fn.now())
+      .andWhere('datetime_start', '<', knex.fn.now())
     res.json(result)
   } catch (error) {
     console.error(error)
   }
 })
 
-app.get('/users/:id/rooms/future', async(req, res) => {
+app.get('/users/:id/rooms/future', async (req, res) => {
   try {
     let host_id = req.params.id
     let result = await knex('rooms')
-      .where({'host_id':host_id})
-      .andWhere('datetime_start','>', knex.fn.now())
+      .where({ 'host_id': host_id })
+      .andWhere('datetime_start', '>', knex.fn.now())
     res.json(result)
   } catch (error) {
     console.error(error)
@@ -198,7 +199,7 @@ app.get('/rooms', async (req, res) => {
 })
 
 app.get('/rooms/:hash', (req, res) => {
-  
+
 })
 
 app.post('/rooms', async (req, res) => {
@@ -210,16 +211,16 @@ app.post('/rooms', async (req, res) => {
     let room_hash = generateRandomString(5);
     let tags_created = req.body.topics
 
-    let room_hash_check = await knex('rooms').where('room_hash')
+    //let room_hash_check = await knex('rooms').where('room_hash')
 
     let result = await knex('rooms')
-      .insert({host_id: host_id, datetime_start: datetime_start, datetime_end: datetime_end, room_name: room_name, room_hash: room_hash, tags_created: JSON.stringify(tags_created) })
+      .insert({ host_id: host_id, datetime_start: datetime_start, datetime_end: datetime_end, room_name: room_name, room_hash: room_hash, tags_created: JSON.stringify(tags_created) })
       .returning('*')
-    
-    if(result.length){
+
+    if (result.length) {
       res.json(result);
     } else {
-      res.json({error: "Unable to insert room"})
+      res.json({ error: "Unable to insert room" })
     }
   } catch (error) {
     console.error(error)
@@ -235,13 +236,15 @@ app.get('/rooms/:hash/questions', async (req, res) => {
       .from('rooms')
       .where('rooms.room_hash', hash)
     let room_id = room_id_obj[0].id
-    console.log('========ROOM ID:',room_id,'=======')
-    let result = await knex.raw('select guests.guest_hash, questions.* from questions, guests where guests.id = questions.user_id and questions.room_id = ? ORDER BY questions.created_at ASC ',[room_id])
+    console.log('========ROOM ID:', room_id, '=======')
+    //let result = await knex.raw('select guests.guest_hash,users.*, questions.* from questions, users, guests where guests.guest_id = users.id and questions.user_id = users.id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
+    //let result = await knex.raw('SELECT * from questions where questions.room_id IN (SELECT guests.id from guests join rooms on guests.room_id = rooms.id join questions on rooms.id = questions.room_id where rooms.id = ?)',[room_id])
+    let result = await knex.raw('select guests.guest_hash, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
     console.log('RESULT IS: ', result.rows)
     if (result.rows.length) {
-    res.json(result.rows);
+      res.json(result.rows);
     } else {
-    res.status(204).json({ error: 'Either wrong hash or this room has no questions' })      
+      res.status(204).json({ error: 'Either wrong hash or this room has no questions' })
     }
   } catch (error) {
     console.error(error);
@@ -273,7 +276,7 @@ app.get('/rooms/:hash/guests', async (req, res) => {
     let result = await knex
       .select(['first_name', 'last_name', 'guests.guest_hash'])
       .from('users')
-      .join('guests', 'guest_id', 'users.id')
+      .join('guests', 'user_id', 'users.id')
       .join('rooms', 'room_id', 'rooms.id')
       .where('rooms.room_hash', hash)
     if (result.length) {
@@ -294,12 +297,12 @@ app.post('/rooms/:hash/questions', async (req, res) => {
     let hash = req.params.hash
     let query = req.body.message
     let tags_selected = req.body.tags
-    let user_id = req.body.user_id
+    let guest_id = req.body.guest_id
 
     console.log(`/rooms/${hash}/questions has been hit with:`)
     console.log("hash, query, tags_selected, user_id")
     console.log("===================================")
-    console.log(hash, query, tags_selected, user_id)
+    console.log(hash, query, tags_selected, guest_id)
     console.log("===================================")
 
     let room_id_obj = await knex.select('rooms.id')
@@ -308,10 +311,10 @@ app.post('/rooms/:hash/questions', async (req, res) => {
 
     let room_id = room_id_obj[0].id
 
-    console.log('========ROOM ID:',room_id,'=======')
+    console.log('========ROOM ID:', room_id, '=======')
 
     let result = await knex('questions')
-      .insert({ user_id: user_id, room_id: room_id, query: query, tags_selected: JSON.stringify(tags_selected) })
+      .insert({ guest_id: guest_id, room_id: room_id, query: query, tags_selected: JSON.stringify(tags_selected) })
 
     res.json(result);
   } catch (error) {
