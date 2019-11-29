@@ -277,15 +277,16 @@ app.post('/rooms', async (req, res) => {
 app.get('/rooms/:hash/questions', async (req, res) => {
   try {
     let hash = req.params.hash
-    let room_id_obj = await knex.select('rooms')
+    let room_id_obj = await knex.select('*')
       .from('rooms')
       .where('rooms.room_hash', hash)
     
     let room_id = room_id_obj[0].id
+    console.log(room_id);
     console.log('========ROOM ID:', room_id, '=======')
     //let result = await knex.raw('select guests.guest_hash,users.*, questions.* from questions, users, guests where guests.guest_id = users.id and questions.user_id = users.id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
     //let result = await knex.raw('SELECT * from questions where questions.room_id IN (SELECT guests.id from guests join rooms on guests.room_id = rooms.id join questions on rooms.id = questions.room_id where rooms.id = ?)',[room_id])
-    let result = await knex.raw('select guests.guest_hash, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
+    let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
     console.log('RESULT IS: ', result.rows)
     if (result.rows.length) {
       res.json(result.rows);
