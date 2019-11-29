@@ -33,6 +33,7 @@ exports.up = function(knex) {
     .unsigned()
     .references('rooms.id')
     .notNull()
+    .onDelete('CASCADE')
     table
     .integer('user_id')
     .unsigned()
@@ -50,11 +51,13 @@ exports.up = function(knex) {
       .unsigned()
       .references('guests.id')
       .notNull()
+      .onDelete('CASCADE')
     table
       .integer('room_id')
       .unsigned()
       .references('rooms.id')
       .notNull()
+      .onDelete('CASCADE')
     table.text('query', 150)
     table.json('tags_selected')
   })
