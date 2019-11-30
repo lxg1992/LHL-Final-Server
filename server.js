@@ -238,8 +238,8 @@ app.get('/rooms/:hash', async (req, res) => {
 //CREATE A ROOM
 app.post('/rooms', async (req, res) => {
   try {
-    let { host_id, datetime_start, datetime_end, room_name, tags_created: topics } = req.body
-    //let tags_created = req.body.topics
+    let { host_id, datetime_start, datetime_end, room_name} = req.body
+    let tags_created = req.body.topics
     let room_hash = generateRandomString(5);
     let room_hash_check = await knex('rooms').where('room_hash', room_hash)
     //Round 1 of checks
