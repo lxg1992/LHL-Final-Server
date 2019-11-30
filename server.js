@@ -298,8 +298,9 @@ app.get('/rooms/:hash/questions', async (req, res) => {
     let room_id = room_id_obj[0].id
     console.log(room_id);
     console.log('========ROOM ID:', room_id, '=======')
-    let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? ORDER BY questions.created_at ASC ', [room_id])
-    console.log('RESULT IS: ', result.rows)
+    let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at ASC ', [room_id, room_id])
+
+    //console.log('RESULT IS: ', result.rows)
     if (result.rows.length) {
       res.json(result.rows);
     } else {
@@ -515,11 +516,11 @@ app.post('/rooms/:hash/questions', async (req, res) => {
       res.status(403).json({ error: 'No hash or query!' })
     }
 
-    console.log(`/rooms/${hash}/questions has been hit with:`)
-    console.log("room_hash, query, tags_selected, guest_id")
-    console.log("===================================")
-    console.log(hash, query, tags_selected, guest_id)
-    console.log("===================================")
+    // console.log(`/rooms/${hash}/questions has been hit with:`)
+    // console.log("room_hash, query, tags_selected, guest_id")
+    // console.log("===================================")
+    // console.log(hash, query, tags_selected, guest_id)
+    // console.log("===================================")
 
     let room_id_obj = await knex.select('rooms.id')
       .from('rooms')
@@ -527,7 +528,7 @@ app.post('/rooms/:hash/questions', async (req, res) => {
 
     let room_id = room_id_obj[0].id
 
-    console.log('========ROOM ID:', room_id, '=======')
+    // console.log('========ROOM ID:', room_id, '=======')
 
     let guest_check = await knex('guests')
       .where('room_id', room_id)
@@ -601,7 +602,38 @@ app.get('/guests', async (req, res) => {
 })
 
 
+app.patch('/guests/ban', async (req, res) => {
+  try {
+    let {room_id, guest_id} = req.body
 
+    // let result = await knex
+    //   .select('*')
+    //   .from('guests')
+    //   .join('rooms',  'rooms.id','guests.room_id')
+    //   .where({'rooms.room_hash': room_hash, 'guests.guest_hash': guest_hash})
+    //   .update({'guests.is_allowed': false})
+    //   .returning('guests.*')
+
+    //let result = await knex.raw("select * from rooms join guests on rooms.id = guests.room_id where room_hash = ? and guest_hash = ?", [room_hash, guest_hash])
+
+    let result = await knex
+      .select('*')
+      .from('guests')
+      .where({id: guest_id})
+      .update({is_allowed: false})
+      .returning('*')
+    
+    if (result.length){
+      res.json(result)
+      return
+    } else {
+      res.status(403).json({error: `Unable to ban guest ${guest_hash} from room ${room_hash}`})
+      return
+    }
+  } catch (error) {
+    console.error(error);
+  }
+})
 
 app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
