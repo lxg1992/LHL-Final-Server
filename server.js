@@ -516,6 +516,8 @@ app.post('/rooms/:hash/questions', async (req, res) => {
       res.status(403).json({ error: 'No hash or query!' })
     }
 
+
+
     // console.log(`/rooms/${hash}/questions has been hit with:`)
     // console.log("room_hash, query, tags_selected, guest_id")
     // console.log("===================================")
@@ -533,6 +535,13 @@ app.post('/rooms/:hash/questions', async (req, res) => {
     let guest_check = await knex('guests')
       .where('room_id', room_id)
       .andWhere('user_id', guest_id)
+
+    if(!guest_check[0].is_allowed){
+      res.status(403).json('Banned user');
+      return
+    }
+
+    
 
 
     let result = await knex('questions')
