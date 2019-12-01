@@ -37,18 +37,7 @@ app.get('/users', async (req, res) => {
   }
 })
 
-app.get('/user/:id/pw', async (req, res) => {
-  try {
-    let result = await knex.select('id', 'password_hash').from('users').where('id', req.params.id)
-    console.log(result);
-    let password = result[0];
-    console.log(result[0].password_hash);
-    console.log(result[0].id)
-    res.json(result);
-  } catch (error) {
 
-  }
-})
 //Create a new user
 app.post('/users/register', async (req, res) => {
   try {
@@ -154,6 +143,7 @@ app.get('/users/hash/:hash', async (req, res) => {
     console.error(error)
   }
 })
+
 //Get all rooms where userID is the host
 app.get('/users/:id/rooms/all', async (req, res) => {
   try {
@@ -235,6 +225,7 @@ app.get('/rooms/:hash', async (req, res) => {
 })
 
 
+
 //CREATE A ROOM
 app.post('/rooms', async (req, res) => {
   try {
@@ -283,8 +274,6 @@ app.get('/users/promise/:id', async (req, res) => {
       console.error(error);
       res.json(error)
     });
-
-
 })
 
 //get all questions by room hash
@@ -349,8 +338,7 @@ app.get('/rooms/:hash/guests', async (req, res) => {
   }
 })
 
-//JOIN A ROOM AS A GUEST
-//app.post('/rooms/join')
+
 
 app.patch('/rooms/activate', async (req, res) => {
   try {
@@ -449,58 +437,6 @@ app.post('/rooms/join', async (req, res) => {
     res.json(newGuest)
     return
   }
-
-
-
-
-
-
-
-
-  /*knex('rooms')
-    .where({ room_hash: room_hash })
-    .then((data1) => {
-      if (data1.length) {
-        console.log(`Room_hash ${room_hash} exists`)
-        return data1
-      }
-      else {
-        res.status(403).json({ error: 'No such room' })
-        throw Error('No such room')
-      }
-    })
-    .then((data2) => {
-      console.log(data2);
-      let room_host_id = data2[0].host_id;
-      console.log(room_host_id)
-
-      knex('rooms')
-        .where({ room_hash: room_hash, host_id: room_host_id })
-        .then((data3) => {
-          if (data3.length) {
-            res.status(403).send({ error: 'Cannot post questions to rooms you are hosting' })
-            throw Error('Attempting to join the room which has host_id is equal to current user')
-          } else {
-            return data3
-          }
-        })
-        .then((data4) => {
-
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-
-      r
-    })
-    .catch((error) => {
-      console.error(error);
-    })
-
-
-*/
-
-
 })
 
 //Post a question into current rooms question 
@@ -516,21 +452,11 @@ app.post('/rooms/:hash/questions', async (req, res) => {
       res.status(403).json({ error: 'No hash or query!' })
     }
 
-
-
-    // console.log(`/rooms/${hash}/questions has been hit with:`)
-    // console.log("room_hash, query, tags_selected, guest_id")
-    // console.log("===================================")
-    // console.log(hash, query, tags_selected, guest_id)
-    // console.log("===================================")
-
     let room_id_obj = await knex.select('rooms.id')
       .from('rooms')
       .where('rooms.room_hash', hash)
 
     let room_id = room_id_obj[0].id
-
-    // console.log('========ROOM ID:', room_id, '=======')
 
     let guest_check = await knex('guests')
       .where('room_id', room_id)
@@ -540,9 +466,6 @@ app.post('/rooms/:hash/questions', async (req, res) => {
       res.status(403).json('Banned user');
       return
     }
-
-    
-
 
     let result = await knex('questions')
       .insert({ guest_id: guest_id, room_id: room_id, query: query, tags_selected: JSON.stringify(tags_selected) })
@@ -580,6 +503,7 @@ app.delete('/rooms/delete', async (req, res) => {
     console.error(error);
   }
 })
+
 //get all questions
 app.get('/questions', async (req, res) => {
   try {
@@ -615,15 +539,6 @@ app.patch('/guests/ban', async (req, res) => {
   try {
     let {room_id, guest_id} = req.body
 
-    // let result = await knex
-    //   .select('*')
-    //   .from('guests')
-    //   .join('rooms',  'rooms.id','guests.room_id')
-    //   .where({'rooms.room_hash': room_hash, 'guests.guest_hash': guest_hash})
-    //   .update({'guests.is_allowed': false})
-    //   .returning('guests.*')
-
-    //let result = await knex.raw("select * from rooms join guests on rooms.id = guests.room_id where room_hash = ? and guest_hash = ?", [room_hash, guest_hash])
 
     let result = await knex
       .select('*')
