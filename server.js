@@ -229,7 +229,7 @@ app.get('/rooms/:hash', async (req, res) => {
 //CREATE A ROOM
 app.post('/rooms', async (req, res) => {
   try {
-    let { host_id, datetime_start, datetime_end, room_name} = req.body
+    let { host_id, datetime_start, datetime_end, room_name, allow_anonymous} = req.body
     let tags_created = req.body.topics
     let room_hash = generateRandomString(5);
     let room_hash_check = await knex('rooms').where('room_hash', room_hash)
@@ -244,7 +244,7 @@ app.post('/rooms', async (req, res) => {
       room_hash_check = await knex('rooms').where('room_hash', room_hash)
     }
     let result = await knex('rooms')
-      .insert({ host_id: host_id, datetime_start: datetime_start, datetime_end: datetime_end, room_name: room_name, room_hash: room_hash, tags_created: JSON.stringify(tags_created) })
+      .insert({ host_id: host_id, datetime_start: datetime_start, datetime_end: datetime_end, room_name: room_name, room_hash: room_hash, tags_created: JSON.stringify(tags_created), allow_anonymous:allow_anonymous})
       .returning('*')
     if (result.length) {
       res.json(result);
@@ -439,6 +439,45 @@ app.post('/rooms/join', async (req, res) => {
   }
 })
 
+app.post('/rooms/join/anonymous', async (req, res) => {
+
+
+  let { room_hash } = req.body
+  let result1 = await knex('rooms')
+    .where({ room_hash: room_hash, is_active: true, allow_anonymous: true })
+  if (!result1.length) {
+    res.status(403).json({ error: 'No such room or room is not active or does not allow anonymous users' })
+    return
+  }
+
+  let room_id = result1[0].id
+
+  let result3 = await knex('guests')
+    .where({ user_id: 0, room_id: room_id })
+
+  if (result3.length) {
+    let allowedGuest = await knex('guests')
+      .where({ user_id: 0, room_id: room_id, is_allowed: true })
+
+    if (allowedGuest.length) {
+      res.json(allowedGuest)
+      return
+    } else {
+      res.status(403).json({ error: 'This user is not allowed in this room' })
+      return
+    }
+  } else {
+    let newGuest = await knex('guests')
+      .insert({ user_id: 0, room_id: room_id, guest_hash: 'anon', is_allowed: true })
+      .returning('*')
+
+    res.json(newGuest)
+    return
+  }
+})
+
+
+
 //Post a question into current rooms question 
 app.post('/rooms/:hash/questions', async (req, res) => {
   try {
@@ -450,6 +489,7 @@ app.post('/rooms/:hash/questions', async (req, res) => {
 
     if (!hash || !query) {
       res.status(403).json({ error: 'No hash or query!' })
+      return
     }
 
     let room_id_obj = await knex.select('rooms.id')
@@ -537,13 +577,17 @@ app.get('/guests', async (req, res) => {
 
 app.patch('/guests/ban', async (req, res) => {
   try {
-    let {room_id, guest_id} = req.body
+    let {
+        //room_id, 
+        guest_id
+      } = req.body
 
 
     let result = await knex
       .select('*')
       .from('guests')
       .where({id: guest_id})
+      //.andWhere({room_id: room_id})
       .update({is_allowed: false})
       .returning('*')
     
@@ -551,9 +595,62 @@ app.patch('/guests/ban', async (req, res) => {
       res.json(result)
       return
     } else {
-      res.status(403).json({error: `Unable to ban guest ${guest_hash} from room ${room_hash}`})
+      res.status(403).json({error: `Unable to ban guest ${result[0].guest_hash} from room `})
       return
     }
+  } catch (error) {
+    console.error(error);
+  }
+})
+
+app.get('/questions/:hash/analysis', async (req, res) => {
+  try {
+    let hash = req.params.hash
+    let room_id_obj = await knex.select('*')
+      .from('rooms')
+      .where('rooms.room_hash', hash)
+
+    if(!room_id_obj.length){
+      res.status(403).json({error: 'No such room'})
+      return
+    }
+    let room_id = room_id_obj[0].id
+
+    let guests = await knex.select('*')
+      .from('guests')
+      .where('guests.room_id', room_id)
+
+    if(!guests.length){
+      res.status(403).json({error: 'No guests were in this room'})
+      return
+    }
+
+
+
+
+
+
+
+    //let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at ASC ', [room_id, room_id])
+    let questions = await knex.select('*')
+      .from('questions')
+      .where('room_id', room_id)
+    //console.log('RESULT IS: ', result.rows)
+    if (!questions.length) {
+      res.status(204).json({ error: 'This room has no questions' })
+      return
+    }
+  
+    console.log(guests)
+    console.log(questions);
+
+
+    let analysisObject = {};
+
+    
+
+    res.json({guests: guests, questions:questions})
+
   } catch (error) {
     console.error(error);
   }

@@ -10,6 +10,7 @@ exports.seed = function(knex) {
       
       // Inserts seed entries
       return knex('users').insert([
+        {id: 0, first_name: 'Anonymous', is_anonymous: true},
         {first_name: 'First', last_name: 'Last', email: 'fl@email.com', password_hash: await hashPassword('fl')},
         {first_name: 'Alex', last_name: 'Garin', email: 'ag@email.com', password_hash: await hashPassword('ag')},
         {first_name: 'mahFirst', last_name :'mahLast', email: 'mm@email.com', password_hash: await hashPassword('mm') },
