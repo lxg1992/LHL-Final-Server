@@ -289,6 +289,7 @@ app.get('/rooms/:hash/questions', async (req, res) => {
     console.log('========ROOM ID:', room_id, '=======')
     let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at ASC ', [room_id, room_id])
 
+
     //console.log('RESULT IS: ', result.rows)
     if (result.rows.length) {
       res.json(result.rows);
@@ -500,7 +501,7 @@ app.post('/rooms/:hash/questions', async (req, res) => {
 
     let guest_check = await knex('guests')
       .where('room_id', room_id)
-      .andWhere('user_id', guest_id)
+      .andWhere('id', guest_id)
 
     if(!guest_check[0].is_allowed){
       res.status(403).json('Banned user');

@@ -102,72 +102,93 @@ const guests =  [
 ]
 
 
-function getTotalQuestionsCount(questionArray){
-  return questionArray.length
-}
+// function getTotalQuestionsCount(questionArray){
+//   return questionArray.length
+// }
 
-function getTotalGuestsCount(guestArray){
-  return guestArray.length
-}
+// function getTotalGuestsCount(guestArray){
+//   return guestArray.length
+// }
 
-function getTotalTagsCount(questionArray){
-  let tagCount = 0;
-  for(let question of questionArray){
-    tagCount += question.tags_selected.length
-  }
-  return tagCount
-}
+// function getTotalTagsCount(questionArray){
+//   let tagCount = 0;
+//   for(let question of questionArray){
+//     tagCount += question.tags_selected.length
+//   }
+//   return tagCount
+// }
 
-function getIndividualTagsCount(questionArray){
-  let tagCountObject = {}
-  for(let question of questionArray){
-    for(let tag of question.tags_selected){
-      let tagUC = tag.toString().toUpperCase();
-      if(tagCountObject[tagUC] === undefined){
-        tagCountObject[tagUC] = 1
-      } else {
-        tagCountObject[tagUC]++
-      }
+// function getIndividualTagsCount(questionArray){
+//   let tagCountObject = {}
+//   for(let question of questionArray){
+//     for(let tag of question.tags_selected){
+
+//       let tagUC = tag.toString().toUpperCase();
+//       if(tagCountObject[tagUC] === undefined){
+//         tagCountObject[tagUC] = 1
+//       } else {
+//         tagCountObject[tagUC]++
+//       }
+//     }
+//   }
+//   return tagCountObject
+// }
+
+
+// function getQuestionsByTag(questionArray){
+
+// }
+
+
+
+
+
+// function getTotalQuestionsByGuestId(questionArray){
+//   let questionByGuestObject = {}
+//   for(let question of questionArray){
+//     if(questionByGuestObject[question.guest_id] === undefined){
+//       questionByGuestObject[question.guest_id] = 1
+//     } else {
+//       questionByGuestObject[question.guest_id]++
+//     }
+//   }
+//   console.log(Object.keys(questionByGuestObject).length)
+//   return questionByGuestObject
+// }
+
+// function getUniqueQuestionAskers(questionArray){
+  
+// }
+
+// function averageQuestionsPerGuest(questionArray){
+  
+// }
+
+// function percentParticipation(questionArray, guestArray){
+
+// }
+
+// console.log('TOTAL QUESTIONS',getTotalQuestionsCount(questions));
+// console.log('TOTAL GUESTS', getTotalGuestsCount(guests));
+// console.log('INDIVIDUAL TAGS', getIndividualTagsCount(questions));
+// console.log('TOTAL TAGS ACTIVATED',getTotalTagsCount(questions));
+// console.log('QUESTIONS BY GUEST ID', getTotalQuestionsByGuestId(questions));
+
+tagCountObject = {}
+
+for (let question of questions){
+  for (let tag of question.tags_selected){
+    let tagUC = tag.toString().toUpperCase();
+    if(tagCountObject[tagUC] === undefined){
+      tagCountObject[tagUC] = {question: [question.query], count: 1};
+    }
+    else{
+      tagCountObject[tagUC]={question: [...tagCountObject[tagUC].question, question.query], count: tagCountObject[tagUC]["count"] += 1};
     }
   }
-  return tagCountObject
 }
 
-function getTotalQuestionsByGuestId(questionArray){
-  let questionByGuestObject = {}
-  for(let question of questionArray){
-    if(questionByGuestObject[question.guest_id] === undefined){
-      questionByGuestObject[question.guest_id] = 1
-    } else {
-      questionByGuestObject[question.guest_id]++
-    }
-  }
-  console.log(Object.keys(questionByGuestObject).length)
-  return questionByGuestObject
-}
-
-function getUniqueQuestionAskers(questionArray){
-  
-}
-
-function averageQuestionsPerGuest(questionArray){
-  
-}
-
-function percentParticipation(questionArray, guestArray){
-
-}
-
-console.log('TOTAL QUESTIONS',getTotalQuestionsCount(questions));
-console.log('TOTAL GUESTS', getTotalGuestsCount(guests));
-console.log('INDIVIDUAL TAGS', getIndividualTagsCount(questions));
-console.log('TOTAL TAGS ACTIVATED',getTotalTagsCount(questions));
-console.log('QUESTIONS BY GUEST ID', getTotalQuestionsByGuestId(questions));
-
-
-
-
-
+console.log(tagCountObject);
 
 
 
