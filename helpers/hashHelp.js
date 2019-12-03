@@ -27,7 +27,7 @@ async function checkPassword (bodyPassword,  databasePassword) {
       }
   })
 
-  console.log(value);
+  console.log('Password match?: ',value);
 
   return value
 }

@@ -12,6 +12,7 @@ const { auth } = require('./middleware/auth')
 const { serverLogger } = require('./middleware/serverLogger')
 const { generateRandomString } = require('./helpers/generateRandomString')
 const { hashPassword, checkPassword } = require('./helpers/hashHelp')
+const { getTotalQuestionsCount, getTotalGuestsCount, getIndividualTagsCount, getTotalTagsCount, getTotalQuestionsByGuestId, getQuestionsInvolvingTags } = require('./helpers/analysisHelp')
 
 const app = express()
 app.use(cors());
@@ -324,7 +325,7 @@ app.get('/rooms/:hash/guests', async (req, res) => {
   try {
     let hash = req.params.hash;
     let result = await knex
-      .select(['first_name', 'last_name', 'guests.guest_hash'])
+      .select(['first_name', 'last_name', 'guests.*'])
       .from('users')
       .join('guests', 'user_id', 'users.id')
       .join('rooms', 'room_id', 'rooms.id')
@@ -604,18 +605,11 @@ app.patch('/guests/ban', async (req, res) => {
   }
 })
 
-app.get('/questions/:hash/analysis', async (req, res) => {
+app.get('/questions/:id/analysis', async (req, res) => {
   try {
-    let hash = req.params.hash
-    let room_id_obj = await knex.select('*')
-      .from('rooms')
-      .where('rooms.room_hash', hash)
 
-    if(!room_id_obj.length){
-      res.status(403).json({error: 'No such room'})
-      return
-    }
-    let room_id = room_id_obj[0].id
+    let room_id = req.params.id
+
 
     let guests = await knex.select('*')
       .from('guests')
@@ -629,10 +623,6 @@ app.get('/questions/:hash/analysis', async (req, res) => {
 
 
 
-
-
-
-    //let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at ASC ', [room_id, room_id])
     let questions = await knex.select('*')
       .from('questions')
       .where('room_id', room_id)
@@ -641,16 +631,24 @@ app.get('/questions/:hash/analysis', async (req, res) => {
       res.status(204).json({ error: 'This room has no questions' })
       return
     }
+
+    res.json({
+      getTotalQuestionsByGuestId:getTotalQuestionsByGuestId(questions),
+      getIndividualTagsCount:getIndividualTagsCount(questions),
+      getQuestionsInvolvingTags:getQuestionsInvolvingTags(questions),
+      getTotalGuestsCount:getTotalGuestsCount(guests),      
+      getTotalQuestionsCount:getTotalQuestionsCount(questions),
+      getTotalTagsCount:getTotalTagsCount(questions)
+    })
+
+    return
+
+    //res.json(getTotalQuestionsByGuestId(questions))
   
-    console.log(guests)
-    console.log(questions);
 
 
-    let analysisObject = {};
 
-    
 
-    res.json({guests: guests, questions:questions})
 
   } catch (error) {
     console.error(error);
