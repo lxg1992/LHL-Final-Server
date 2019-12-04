@@ -1,5 +1,3 @@
-
-
 const morganBody = require('morgan-body')
 const express = require('express');
 const PORT = process.env.PORT || 3001;
@@ -20,13 +18,11 @@ app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 morganBody(app, {
-
+  theme: 'darkened'
 });
-//app.use(serverLogger)
 
 
 //Test route
-
 app.get('/', (req, res) => {
   res.send({ message: 'No resource at this route, try /users, /rooms, /guests, /questions' })
 })
@@ -50,12 +46,10 @@ app.post('/users/register', async (req, res) => {
 
     if (!first_name || !last_name || !email || !password) {
       res.status(400).send({ error: 'Please enter all fields' })
-      console.log('Empty fields HIT')
     } else {
 
       let emailCheck = await knex('users').where('email', email)
       if (emailCheck.length) {
-        console.log('Email exists  HIT')
         res.status(400).json({ error: "Email already registered" })
       } else {
         let password_hash = await hashPassword(password)
@@ -116,20 +110,7 @@ app.post('/users/login', async (req, res) => {
 })
 
 
-//Get a user by email
-app.get('/users/:email', async (req, res) => {
-  try {
-    let email = req.params.email
-    let result = await knex('users').where('email', email)
-    if (result.length) {
-      res.json(result)
-    } else {
-      res.json({ error: "No such email" })
-    }
-  } catch (error) {
-    console.error(error)
-  }
-})
+
 
 app.get('/users/hash/:hash', async (req, res) => {
   try {
@@ -496,8 +477,13 @@ app.post('/rooms/:hash/questions', async (req, res) => {
     let tags_selected = req.body.tags
     let guest_id = req.body.guest_id
 
-    if (!hash || !query) {
-      res.status(403).json({ error: 'No hash or query!' })
+    if (!hash) {
+      res.status(403).json({ error: 'No hash!' })
+      return
+    }
+
+    if(!query){
+      res.status(403).json({error: 'No input detected'})
       return
     }
 
@@ -586,17 +572,12 @@ app.get('/guests', async (req, res) => {
 
 app.patch('/guests/ban', async (req, res) => {
   try {
-    let {
-        //room_id, 
-        guest_id
-      } = req.body
-
+    let { guest_id } = req.body
 
     let result = await knex
       .select('*')
       .from('guests')
       .where({id: guest_id})
-      //.andWhere({room_id: room_id})
       .update({is_allowed: false})
       .returning('*')
     
@@ -618,21 +599,14 @@ app.get('/error', async (req, res) => {
 
 app.get('/questions/:id/analysis', async (req, res) => {
   try {
-
     let room_id = req.params.id
-
-
     let guests = await knex.select('*')
       .from('guests')
       .where('guests.room_id', room_id)
-
     if(!guests.length){
       res.status(403).json({error: 'No guests were in this room'})
       return
     }
-
-
-
 
     let questions = await knex.select('*')
       .from('questions')
