@@ -34,6 +34,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.20.2",
+    "morgan-body": "^2.4.8",
     "pg": "^7.14.0"
   },
   "devDependencies": {

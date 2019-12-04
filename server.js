@@ -1,5 +1,6 @@
-//TO DO: HASH User password seeds, CHECK IF ROOM HAS IS UNIQUE password
 
+
+const morganBody = require('morgan-body')
 const express = require('express');
 const PORT = process.env.PORT || 3001;
 const knex = require('./knex/db.js');
@@ -18,7 +19,10 @@ const app = express()
 app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(serverLogger)
+morganBody(app, {
+
+});
+//app.use(serverLogger)
 
 
 //Test route
@@ -231,6 +235,27 @@ app.get('/rooms/:hash', async (req, res) => {
 app.post('/rooms', async (req, res) => {
   try {
     let { host_id, datetime_start, datetime_end, room_name, allow_anonymous} = req.body
+
+    if (!host_id){
+      res.json({error: 'No host id'})
+      return
+    }
+
+    if (!datetime_start){
+      res.json({error: 'No datetime start'})
+      return
+    }
+
+    if (!datetime_end){
+      res.json({error: 'No datetime '})
+      return
+    }
+
+    if(!room_name){
+      res.json({error: 'No room name'})
+      return
+    }
+
     let tags_created = req.body.topics
     let room_hash = generateRandomString(5);
     let room_hash_check = await knex('rooms').where('room_hash', room_hash)
@@ -257,25 +282,7 @@ app.post('/rooms', async (req, res) => {
   }
 })
 
-app.get('/users/promise/:id', async (req, res) => {
-  knex.select('*')
-    .from('users')
-    .where({ id: req.params.id })
-    .then(function (rows) {
-      if (rows.length) {
-        return rows
-      } else {
-        return { error: 'No data' }
-      }
-    })
-    .then((data) => {
-      res.json(data);
-    })
-    .catch(function (error) {
-      console.error(error);
-      res.json(error)
-    });
-})
+
 
 //get all questions by room hash
 app.get('/rooms/:hash/questions', async (req, res) => {
@@ -603,6 +610,10 @@ app.patch('/guests/ban', async (req, res) => {
   } catch (error) {
     console.error(error);
   }
+})
+
+app.get('/error', async (req, res) => {
+  res.json({error:'Error test'})
 })
 
 app.get('/questions/:id/analysis', async (req, res) => {
