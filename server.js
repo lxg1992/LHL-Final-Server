@@ -152,6 +152,8 @@ app.get('/users/:id/rooms/past', async (req, res) => {
     let result = await knex('rooms')
       .where({ 'host_id': host_id })
       .andWhere('datetime_end', '<', knex.fn.now())
+      .orderBy('datetime_start', 'desc')
+
     res.json(result)
   } catch (error) {
     console.error(error)
@@ -165,6 +167,7 @@ app.get('/users/:id/rooms/current', async (req, res) => {
       .where({ 'host_id': host_id })
       .andWhere('datetime_end', '>', knex.fn.now())
       .andWhere('datetime_start', '<', knex.fn.now())
+      .orderBy('datetime_start', 'desc')
     res.json(result)
   } catch (error) {
     console.error(error)
@@ -177,6 +180,8 @@ app.get('/users/:id/rooms/future', async (req, res) => {
     let result = await knex('rooms')
       .where({ 'host_id': host_id })
       .andWhere('datetime_start', '>', knex.fn.now())
+      .orderBy('datetime_start', 'desc')
+
     res.json(result)
   } catch (error) {
     console.error(error)
@@ -276,7 +281,7 @@ app.get('/rooms/:hash/questions', async (req, res) => {
     let room_id = room_id_obj[0].id
     console.log(room_id);
     console.log('========ROOM ID:', room_id, '=======')
-    let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at ASC ', [room_id, room_id])
+    let result = await knex.raw('select guests.*, questions.* from questions, guests where guests.id = questions.guest_id and questions.room_id = ? and guests.room_id = ? ORDER BY questions.created_at DESC ', [room_id, room_id])
 
 
     //console.log('RESULT IS: ', result.rows)
