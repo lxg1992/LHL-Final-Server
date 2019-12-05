@@ -11,7 +11,7 @@ exports.seed = function(knex) {
         /*3*/{room_id: 3, user_id: 2, guest_hash: 'kek'},
         /*4*/{room_id: 3, user_id: 3, guest_hash: 'kik'},
         /*5*/{room_id: 3, user_id: 4, guest_hash: 'kak'},
-        /*6*/{room_id: 3, user_id: 5, guest_hash: 'kuk', is_allowed: false},
+        /*6*/{room_id: 3, user_id: 5, guest_hash: 'kuk'},
         /*7*/{room_id: 3, user_id: 6, guest_hash: 'kyk', is_allowed: false},
         
   
