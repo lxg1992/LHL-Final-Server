@@ -8,7 +8,6 @@ const config = require('config');
 const jwt = require('jsonwebtoken');
 
 const { auth } = require('./middleware/auth')
-const { serverLogger } = require('./middleware/serverLogger')
 const { generateRandomString } = require('./helpers/generateRandomString')
 const { hashPassword, checkPassword } = require('./helpers/hashHelp')
 const { getTotalQuestionsCount, getTotalGuestsCount, getIndividualTagsCount, getTotalTagsCount, getTotalQuestionsByGuestId, getQuestionsInvolvingTags } = require('./helpers/analysisHelp')
@@ -632,13 +631,6 @@ app.get('/questions/:id/analysis', async (req, res) => {
     })
 
     return
-
-    //res.json(getTotalQuestionsByGuestId(questions))
-  
-
-
-
-
 
   } catch (error) {
     console.error(error);
