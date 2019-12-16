@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('config');
 const jwt = require('jsonwebtoken');
+require('heroku-self-ping')('https://nameless-headland-31743.herokuapp.com/')
+
 
 const { auth } = require('./middleware/auth')
 const { generateRandomString } = require('./helpers/generateRandomString')
