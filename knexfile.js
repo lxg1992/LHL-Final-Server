@@ -34,12 +34,7 @@ module.exports = {
 
   production: {
     client: 'pg',
-    connection: {
-      host: 'localhost',
-      database: 'final',
-      user:'final',
-      password:'final'
-    },//process.env.DATABASE_URL, //DB_URL => uses port 5433, DB_URL_ALT => uses port 5432
+    connection: process.env.DATABASE_URL, //DB_URL => uses port 5433, DB_URL_ALT => uses port 5432
     pool: {
       min: 2,
       max: 10
